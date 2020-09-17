@@ -1,2 +1,145 @@
 {% extends 'glist/index.html' %}
+{% load static %}
 
+{% block css %}
+    {{ block.super }}
+<style>
+    .product-list { overflow-y: scroll }
+    .product-list td:nth-child(n+3) { text-align: right }
+    tbody>tr { cursor: pointer }
+</style>
+{% endblock %}
+
+{% block title %}Manage Gift List{% endblock %}
+
+{% block content %}
+    <div class="row" id="app">
+        <div class="col-6">
+            <h3>My List</h3>
+            <table class="table">
+                <thead>
+                    <tr><th>Name</th><th>Brand</th><th>Acquired</th></tr>
+                </thead>
+                <tbody>
+                    <tr v-for="itm in itemList">
+                        <td>${ itm }</td>
+                        <td>${ itm.brandName }</td>
+                        <td>${ itm.qty_purchased } / ${ itm.qty }</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-6">
+            <h3 class="text-muted">All Products</h3>
+            <div class="product-list mh-100">
+                <table class="table">
+                    <thead>
+                        <tr><th>&nbsp;&nbsp;&nbsp;&nbsp;</th><th>Name</th><th>Brand</th><th>Price</th><th>Stock</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="p in productList" key="p.id"
+                            @click="canAdd(p.id) ? (hiProduct == p.id ? hiProduct = null : hiProduct = p.id) : hiProduct = null"
+                            :class="{'bg-light': hiProduct == p.id}">
+                            <td class="py-2 px-0"><button title="Add product to List" :class="'btn btn-sm btn-primary mb-0 mx-0 d-' + (p.id == hiProduct ? 'block': 'none')"
+                                        @click="addProduct(p.id)">&lt;&lt;</button></td>
+                            <td>${ p.name }</td> <td>${ p.brandName }</td> <td>${ p.price }<span class="d-none d-md-inline text-muted">${ p.currency }</span></td> <td>${ p.qty }</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    {{ block.super }}
+    <script src="//cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
+    <!--script src="//cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script-->
+    <script src="{% static 'glist/js/vue.js' %}"></script>
+    <script src="//unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+
+    var app = new Vue({
+        delimiters: ["${", "}"],
+        el: '#app',
+        data: {
+            currencies: [{}],
+            brands: [{}],
+            products: [{}],
+            items: [{}],
+            hiProduct: null,  // which product is highlighted
+        },
+        methods: {
+            addProduct: function (id) {
+                var self = this;
+                if (self.canAdd(id)) {
+                    axios.post('{% url 'api-gift-add' %}', {product_id: id},
+                        { xsrfCookieName: '{{ cookie_name }}',
+                          xsrfHeaderName: '{{ cookie_header }}',
+                          headers: {'X-Requested-With': 'XMLHttpRequest'}
+                          }
+                        ).then(function(response) {
+                            var gift = JSON.parse(response.data)
+                            self.items.push(gift)
+                        })
+
+                }
+            },
+            canAdd: function (id) {
+                // check that it has not depleted stock
+                var self = this,
+                    prod = _.find(self.products, {id: id}),
+                    gift = _.find(self.items, {product: id});
+                return  !gift || gift.qty < prod
+            },
+            loadIndex: function (url, storeAttr) {
+                var self = this;
+                axios.get(url).then(function(response) {
+                    var data = JSON.parse(response.data);
+                    self[storeAttr] = data.map(function (c) {
+                        return {code: c.pk, name: c.fields.name }
+                    })
+                })
+            },
+            loadList: function (url, storeAttr) {
+                var self = this;
+                axios.get(url).then(function(response) {
+                    var data = JSON.parse(response.data);
+                    self[storeAttr] = data.map(function (p) {
+                        var itm = p.fields;
+                        itm.id = p.pk;
+                        return itm
+                    })
+                })
+            }
+        },
+        computed: {
+            productList: function () {
+                var self = this;
+                return self.products.map(function (p) {
+                    var out = p,
+                        brand = _.find(self.brands, {code: out.brand});
+                    out.brandName = brand && brand.name || out.brand;
+                    return out
+                })
+            },
+            itemList: function () {
+                return this.items
+            }
+        },
+        created: function () {
+            var self = this;
+            self.loadIndex('{% url 'api-currency' %}', 'currencies');
+            self.loadIndex('{% url 'api-brand' %}', 'brands');
+        },
+        mounted: function () {
+            var self = this;
+            self.loadList('{% url 'api-product' %}', 'products');
+            self.loadList('{% url 'api-list' %}', 'items');
+        }
+    })
+
+</script>
+{% endblock %}

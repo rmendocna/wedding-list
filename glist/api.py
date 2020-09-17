@@ -7,7 +7,7 @@ from django.forms.models import model_to_dict
 from django.http import (Http404, HttpResponseBadRequest,
                          HttpResponseNotAllowed, JsonResponse)
 
-from .models import Product, GiftList, GiftListItem
+from .models import Brand, Currency, Product, GiftList, GiftListItem
 
 
 def allowed(*methods):
@@ -22,20 +22,44 @@ def allowed(*methods):
             if request.method in methods:
                 return endpoint(request, *args, **kwargs)
             else:
-                return HttpResponseNotAllowed()
+                return HttpResponseNotAllowed(methods)
         return _wrapped_view
     return decorator
 
 
+def authenticated(endpoint):
+    @wraps(endpoint)
+    def wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            out = JsonResponse({'error': 'Unauthorised'}, status=401)
+            out['Authorization'] = 'basic'  # always over https
+            return out
+        else:
+            return endpoint(request, *args, **kwargs)
+    return wrapped
+
+
 @allowed('GET')
-def product_list(request):
-    products = Product.objects.all()
-    output = serialize('json', products, indent=2)
+def object_list(request, kls):
+    objs = kls.objects.all()
+    output = serialize('json', objs, indent=2)
     return JsonResponse(output, safe=False)
 
 
+def product_list(request):
+    return object_list(request, Product)
+
+
+def brand_list(request):
+    return object_list(request, Brand)
+
+
+def currency_list(request):
+    return object_list(request, Currency)
+
+
 @allowed('GET')
-@login_required
+@authenticated
 def gift_list(request):
     gl = GiftList.objects.get(user=request.user)
     items = GiftListItem.objects.filter(gift_list=gl)
@@ -44,7 +68,7 @@ def gift_list(request):
 
 
 @allowed('POST')
-@login_required
+@authenticated
 def gift_add(request):
     """
     Takes a product ID and adds it as a gift item to the user's GiftList
@@ -70,7 +94,7 @@ def gift_add(request):
 
 
 @allowed('DELETE')
-@login_required
+@authenticated
 def git_remove(request, item_id):
     """
     Removes 1 Item count from the current user's GiftList
@@ -88,7 +112,7 @@ def git_remove(request, item_id):
 
 
 @allowed('GET')
-@login_required
+@authenticated
 def guest_gift_list(request, gift_list_id):
     guest = request.user.invitations.get(wedding_id=gift_list_id)
     gl = guest.wedding
@@ -96,5 +120,3 @@ def guest_gift_list(request, gift_list_id):
         return Http404()
     items = serialize('json', gl.items.filter(qty__gt=F('qty_purchased')))
     return JsonResponse(items, safe=False)
-
-
