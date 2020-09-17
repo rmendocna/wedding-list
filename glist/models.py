@@ -54,22 +54,36 @@ class Guest(models.Model):
     recipient = models.CharField(_('Guest(s) names'), max_length=80,
                                  help_text='The name or names typically following `Dear ...`')
     wedding = models.ForeignKey(GiftList, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                             related_name='invitations', blank=True)
 
 
 class GiftListItem(models.Model):
     """
     Each item in a couple's Gist Line
     """
-    gift_list = models.ForeignKey(GiftList, on_delete=models.CASCADE)
+    gift_list = models.ForeignKey(GiftList, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     qty = models.PositiveSmallIntegerField(_('Quant'), default=1,
                                            help_text="Most of the times only one existence of "
                                                      "any product will be added to the list")
-    price = models.DecimalField(_('Price'), max_digits=8, decimal_places=2,
-                                help_text="Gift price must remain unchanged")
+    qty_purchased = models.PositiveSmallIntegerField(
+        _('Purchases'), default=0,
+        help_text="Tracks how many are already ordered")
+    price = models.DecimalField(_('Price'), max_digits=8, decimal_places=2, null=True,
+                                blank=True, help_text="Gift price must remain unchanged")
     date_added = models.DateTimeField(_('When added'), auto_now_add=True)
     added_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def get_price(self):
+        """
+        If the price is not defined here, get the price from the
+        corresponding entry in the products table
+        """
+        price = self.price
+        if not price:
+            price = self.product.price
+        return price
 
 
 class Purchase(models.Model):
