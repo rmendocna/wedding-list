@@ -4,11 +4,16 @@
 {% block css %}
     {{ block.super }}
 <style>
-    .product-list { overflow-y: scroll; max-height: 500px }
+    .col-12 {
+        transition: width 1s 1s
+    }
+    .product-list { overflow-y: scroll; max-height: 600px }
     .product-list tr>*  { padding-left: 2px; padding-right: 2px}
     .product-list tr>*:nth-child(n+4) { text-align: right }
     .product-list th:nth-child(1) { min-width: 1.7rem }
     tbody>tr { cursor: pointer }
+    .items-block tr>*:nth-child(3) { white-space: nowrap !important}
+    .remove.btn { margin: -2px -1rem}
 </style>
 {% endblock %}
 
@@ -16,24 +21,29 @@
 
 {% block content %}
     <div class="row" id="app">
-        <div class="col-6">
-            <div class="badge badge-info float-right p-2 mt-2">${ sumAcquired } / ${ sumQty }</div>
+        <div :class="'items-block col-' + (editMode ? '6' : '12')">
+            <button :class="'btn float-right btn-' + (editMode ? 'success' : 'info')" @click="editMode = !editMode">
+                <span v-if="editMode">&gt; Done</span><span v-else>Edit</span></button>
+            <thead>
+
             <h3>My List</h3>
             <table class="table">
-                <thead>
-                    <tr><th>Name</th><th>Brand</th><th>Acquired</th></tr>
+                    <tr><th>Name</th><th>Brand</th><th>${ sumAcquired } / ${ sumQty }</th></tr>
                 </thead>
                 <tbody>
                     <tr v-for="itm in itemList">
-                        <td>${ itm.data.name }</td>
-                        <td>${ itm.data.brandName }</td>
-                        <td>${ itm.qty_purchased } / ${ itm.qty }</td>
+                        <td>${ itm.data && itm.data.name || '' }</td>
+                        <td>${ itm.data && itm.data.brandName }</td>
+                        <td>${ itm.qty_purchased } / ${ itm.qty }
+                            <button v-if="editMode" class="remove btn btn-danger btn-sm float-right"
+                                    @click="removeItem(itm, $event)">x</button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="col-6">
+        <div v-if="editMode" class="col-6">
             <h3 class="text-muted">All Products</h3>
             <div class="product-list">
                 <table class="table">
@@ -41,12 +51,14 @@
                         <tr><th></th><th>Name</th><th>Brand</th><th>Price</th><th>Stock</th></tr>
                     </thead>
                     <tbody>
-                        <tr v-for="p in productList" key="p.id"
+                        <tr v-for="p in productList" :key="p.id"
                             @click="canAdd(p.id) ? (hiProduct == p.id ? hiProduct = null : hiProduct = p.id) : hiProduct = null"
                             :class="hiProduct == p.id ? 'bg-white': 'bg-light'">
+
                             <td class="py-2 px-0"><button title="Add product to List" :class="'add-btn btn btn-sm btn-primary d-' + (p.id == hiProduct ? 'block': 'none')"
                                         @click="addProduct(p.id)">&lt;</button></td>
-                            <td>${ p.name }</td> <td>${ p.brandName }</td> <td>${ p.price }<small class="d-none d-md-inline text-muted">${ p.currency }</small></td> <td>${ p.qty }</td>
+                            <td>${ p.name }</td> <td>${ p.brandName }</td> <td>${ p.price }<small class="d-none d-md-inline text-muted">${ p.currency }</small></td> <td>${ p.qty }
+                        </td>
                         </tr>
                     </tbody>
                 </table>
@@ -73,12 +85,28 @@
             products: [{}],
             items: [{}],
             hiProduct: null,  // which product is highlighted
+            editMode: false
         },
         methods: {
+            removeItem: function (itm, event) {
+                var self = this;
+                if (confirm('Are you sure you want to remove item `' + itm.data.name + '`?')) {
+                    axios.delete('{% url 'api-gift' %}' + itm.id + '/', {
+                        xsrfCookieName: '{{ cookie_name }}',
+                        xsrfHeaderName: '{{ cookie_header }}',
+                        headers: {'X-Requested-With': 'XMLHttpRequest'}
+                    }).then(function(response) {
+                        var data = response.data,
+                            item = _.find(self.items, {id: data.id});
+                        item.qty = data.qty
+
+                    })
+                }
+            },
             addProduct: function (id) {
                 var self = this;
                 if (self.canAdd(id)) {
-                    axios.post('{% url 'api-gift-add' %}', {product_id: id},
+                    axios.post('{% url 'api-gift' %}', {product_id: id},
                         { xsrfCookieName: '{{ cookie_name }}',
                           xsrfHeaderName: '{{ cookie_header }}',
                           headers: {'X-Requested-With': 'XMLHttpRequest'}
@@ -145,8 +173,11 @@
                 return this.sumItems('qty')
             },
             itemList: function () {
-                var self = this;
-                return self.items.map(function (i) {
+                var self = this,
+                    items = _.filter(self.items, function (i) {
+                        return i.qty > 0
+                    });
+                return items.map(function (i) {
                     var obj = i;
                     obj.data = _.find(self.productList, {id: i.product});
                     return obj;
@@ -161,7 +192,7 @@
         mounted: function () {
             var self = this;
             self.loadList('{% url 'api-product' %}', 'products');
-            self.loadList('{% url 'api-list' %}', 'items');
+            self.loadList('{% url 'api-gift' %}', 'items');
         }
     })
 

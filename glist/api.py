@@ -96,7 +96,7 @@ def gift_add(request):
 
 @allowed('DELETE')
 @authenticated
-def git_remove(request, item_id):
+def gift_remove(request, item_id):
     """
     Removes 1 Item count from the current user's GiftList
     If it's the only account of that item, removes the item entirely
@@ -108,8 +108,29 @@ def git_remove(request, item_id):
         item.delete()
     else:
         item.qty -= 1
+        item.save()
     output['qty'] -= 1
     return JsonResponse(output)
+
+
+def gift(request):
+    if request.method == 'GET':
+        return gift_list(request)
+    elif request.method == 'POST':
+        return gift_add(request)
+    else:
+        return HttpResponseNotAllowed()
+
+
+def gift_item(request, item_id):
+    if request.method == 'DELETE':
+        return gift_remove(request, item_id)
+    # elif request.method == 'PUT':
+    #   to be implemented
+    # elif request.method == 'GET':
+    #   to be implemented
+    else:
+        return HttpResponseNotAllowed()
 
 
 @allowed('GET')

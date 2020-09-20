@@ -11,7 +11,7 @@ urlpatterns = [
         path('currency/', api.currency_list, name='api-currency'),
         path('brand/', api.brand_list, name='api-brand'),
         path('product/', api.product_list, name='api-product'),
-        path('list/', api.gift_list, name='api-list'),
-        path('list/add/', api.gift_add, name='api-gift-add'),
+        path('list/', api.gift, name='api-gift'),  # list + add
+        path('list/<int:item_id>/', api.gift_item, name='api-gift-item'),  # delete
     ]))
     ]
