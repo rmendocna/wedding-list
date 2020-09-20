@@ -16,6 +16,7 @@ def couple(request):
         return HttpResponseForbidden('You do not have privileges to access this resource')
 
     cookie_name = settings.CSRF_COOKIE_NAME
-    cookie_header = settings.CSRF_HEADER_NAME
+    # https://vsupalov.com/avoid-csrf-errors-axios-django/
+    cookie_header = 'X-CSRFTOKEN'  # settings.CSRF_HEADER_NAME
 
     return render(request, 'glist/couple.html', locals())

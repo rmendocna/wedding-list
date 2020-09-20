@@ -4,8 +4,10 @@
 {% block css %}
     {{ block.super }}
 <style>
-    .product-list { overflow-y: scroll }
-    .product-list td:nth-child(n+3) { text-align: right }
+    .product-list { overflow-y: scroll; max-height: 500px }
+    .product-list tr>*  { padding-left: 2px; padding-right: 2px}
+    .product-list tr>*:nth-child(n+4) { text-align: right }
+    .product-list th:nth-child(1) { min-width: 1.7rem }
     tbody>tr { cursor: pointer }
 </style>
 {% endblock %}
@@ -15,6 +17,7 @@
 {% block content %}
     <div class="row" id="app">
         <div class="col-6">
+            <div class="badge badge-info float-right p-2 mt-2">${ sumAcquired } / ${ sumQty }</div>
             <h3>My List</h3>
             <table class="table">
                 <thead>
@@ -22,8 +25,8 @@
                 </thead>
                 <tbody>
                     <tr v-for="itm in itemList">
-                        <td>${ itm }</td>
-                        <td>${ itm.brandName }</td>
+                        <td>${ itm.data.name }</td>
+                        <td>${ itm.data.brandName }</td>
                         <td>${ itm.qty_purchased } / ${ itm.qty }</td>
                     </tr>
                 </tbody>
@@ -32,18 +35,18 @@
 
         <div class="col-6">
             <h3 class="text-muted">All Products</h3>
-            <div class="product-list mh-100">
+            <div class="product-list">
                 <table class="table">
                     <thead>
-                        <tr><th>&nbsp;&nbsp;&nbsp;&nbsp;</th><th>Name</th><th>Brand</th><th>Price</th><th>Stock</th></tr>
+                        <tr><th></th><th>Name</th><th>Brand</th><th>Price</th><th>Stock</th></tr>
                     </thead>
                     <tbody>
                         <tr v-for="p in productList" key="p.id"
                             @click="canAdd(p.id) ? (hiProduct == p.id ? hiProduct = null : hiProduct = p.id) : hiProduct = null"
-                            :class="{'bg-light': hiProduct == p.id}">
-                            <td class="py-2 px-0"><button title="Add product to List" :class="'btn btn-sm btn-primary mb-0 mx-0 d-' + (p.id == hiProduct ? 'block': 'none')"
-                                        @click="addProduct(p.id)">&lt;&lt;</button></td>
-                            <td>${ p.name }</td> <td>${ p.brandName }</td> <td>${ p.price }<span class="d-none d-md-inline text-muted">${ p.currency }</span></td> <td>${ p.qty }</td>
+                            :class="hiProduct == p.id ? 'bg-white': 'bg-light'">
+                            <td class="py-2 px-0"><button title="Add product to List" :class="'add-btn btn btn-sm btn-primary d-' + (p.id == hiProduct ? 'block': 'none')"
+                                        @click="addProduct(p.id)">&lt;</button></td>
+                            <td>${ p.name }</td> <td>${ p.brandName }</td> <td>${ p.price }<small class="d-none d-md-inline text-muted">${ p.currency }</small></td> <td>${ p.qty }</td>
                         </tr>
                     </tbody>
                 </table>
@@ -81,8 +84,14 @@
                           headers: {'X-Requested-With': 'XMLHttpRequest'}
                           }
                         ).then(function(response) {
-                            var gift = JSON.parse(response.data)
-                            self.items.push(gift)
+                            var gift = response.data,
+                                matchedItem = _.find(self.items, {product: gift.product});
+                            if (matchedItem) {
+                                matchedItem.qty += 1;
+                                self.$forceUpdate()
+                            } else {
+                                self.items.push(gift)
+                            }
                         })
 
                 }
@@ -92,7 +101,7 @@
                 var self = this,
                     prod = _.find(self.products, {id: id}),
                     gift = _.find(self.items, {product: id});
-                return  !gift || gift.qty < prod
+                return  !gift || gift.qty < prod.qty
             },
             loadIndex: function (url, storeAttr) {
                 var self = this;
@@ -113,6 +122,10 @@
                         return itm
                     })
                 })
+            },
+            sumItems: function (attr) {
+                var self = this;
+                return _.reduce(self.items, function (acc, x) { return acc += x[attr] || 0 }, 0)
             }
         },
         computed: {
@@ -125,8 +138,19 @@
                     return out
                 })
             },
+            sumAcquired: function () {
+                return this.sumItems('qty_acquired')
+            },
+            sumQty: function () {
+                return this.sumItems('qty')
+            },
             itemList: function () {
-                return this.items
+                var self = this;
+                return self.items.map(function (i) {
+                    var obj = i;
+                    obj.data = _.find(self.productList, {id: i.product});
+                    return obj;
+                })
             }
         },
         created: function () {

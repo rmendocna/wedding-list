@@ -1,6 +1,6 @@
 from functools import wraps
+import json
 
-from django.contrib.auth.decorators import login_required
 from django.core.serializers import serialize
 from django.db.models.expressions import F
 from django.forms.models import model_to_dict
@@ -74,9 +74,10 @@ def gift_add(request):
     Takes a product ID and adds it as a gift item to the user's GiftList
     If the item already exists, increases its count
     """
-    if not request.POST.get('product_id', 'error').is_numeric():
-        return HttpResponseBadRequest
-    product_id = request.POST['product_id']
+    data = json.loads(request.body)
+    if type(data.get('product_id', 'error')) != int:
+        return HttpResponseBadRequest()
+    product_id = data['product_id']
     gl = GiftList.objects.get(user=request.user)
     product = Product.objects.get(pk=product_id)
     # Check if its there already
