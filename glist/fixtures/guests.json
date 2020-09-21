@@ -1,0 +1,12 @@
+[
+{
+    "model": "glist.guest",
+    "pk": 1,
+    "fields": {
+        "email": "guest1@example.com",
+        "recipient": "Ricardo Mendonça",
+        "wedding": 1,
+        "user": 2
+    }
+}
+]

@@ -45,7 +45,7 @@ class GiftList(models.Model):
     spouse_x_name = models.CharField(max_length=50)
     spouse_y_name = models.CharField(max_length=50)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    active = models.BooleanField(default=False, help_text='`Inactive` gift lists allow building '
+    active = models.BooleanField(default=True, help_text='`Inactive` gift lists allow building '
                                                           'the list prior to making it public')
 
 

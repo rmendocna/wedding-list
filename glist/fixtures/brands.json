@@ -1,0 +1,94 @@
+[
+{
+    "model": "glist.brand",
+    "pk": 1,
+    "fields": {
+        "name": "Le Creuset"
+    }
+},
+{
+    "model": "glist.brand",
+    "pk": 2,
+    "fields": {
+        "name": "ROYAL DOULTON"
+    }
+},
+{
+    "model": "glist.brand",
+    "pk": 3,
+    "fields": {
+        "name": "KITCHENAID"
+    }
+},
+{
+    "model": "glist.brand",
+    "pk": 4,
+    "fields": {
+        "name": "SMEG SMALL APPLIANCES"
+    }
+},
+{
+    "model": "glist.brand",
+    "pk": 5,
+    "fields": {
+        "name": "BEAU LIVING"
+    }
+},
+{
+    "model": "glist.brand",
+    "pk": 6,
+    "fields": {
+        "name": "WEBER GRILLS"
+    }
+},
+{
+    "model": "glist.brand",
+    "pk": 7,
+    "fields": {
+        "name": "GARDENSTORE"
+    }
+},
+{
+    "model": "glist.brand",
+    "pk": 8,
+    "fields": {
+        "name": "THE WHITE COMPANY"
+    }
+},
+{
+    "model": "glist.brand",
+    "pk": 9,
+    "fields": {
+        "name": "GRAHAM & GREEN"
+    }
+},
+{
+    "model": "glist.brand",
+    "pk": 10,
+    "fields": {
+        "name": "NKUKU"
+    }
+},
+{
+    "model": "glist.brand",
+    "pk": 11,
+    "fields": {
+        "name": "OKA"
+    }
+},
+{
+    "model": "glist.brand",
+    "pk": 12,
+    "fields": {
+        "name": "WILLOW STORE"
+    }
+},
+{
+    "model": "glist.currency",
+    "pk": "GBP",
+    "fields": {
+        "name": "",
+        "gbp_conversion": null
+    }
+}
+]

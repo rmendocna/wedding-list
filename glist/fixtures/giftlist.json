@@ -1,0 +1,14 @@
+[
+{
+    "model": "glist.giftlist",
+    "pk": 1,
+    "fields": {
+        "wedding_date": "2020-09-17",
+        "wedding_name": "The most beautiful wedding in the world",
+        "spouse_x_name": "Maria",
+        "spouse_y_name": "Manuel",
+        "user": 1,
+        "active": true
+    }
+}
+]

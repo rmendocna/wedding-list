@@ -66,7 +66,8 @@ class Command(BaseCommand):
                         failed += 1
                     else:
                         success += 1
-        self.stdout.write('Total products: %d' % (failed + success))
+        if verbosity > 0:
+            self.stdout.write('Total products: %d' % (failed + success))
         if failed:
             self.stderr.write('Failed %d' % failed)
             self.stdout.write('Succeeded: %d' % success)

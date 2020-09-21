@@ -156,7 +156,7 @@ def purchase_add(request, gift_list_id):
         return Http404()
     data = json.loads(request.body)
     if type(data.get('item_id', 'error')) != int:
-        return HttpResponseBadRequest
+        return HttpResponseBadRequest()
     item_id = data['item_id']
     try:
         item = GiftListItem.objects.get(pk=item_id, qty__gt=F('qty_purchased'))

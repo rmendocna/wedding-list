@@ -1,0 +1,222 @@
+[
+{
+    "model": "glist.product",
+    "pk": 1,
+    "fields": {
+        "name": "Tea pot",
+        "price": "47.00",
+        "qty": 50,
+        "brand": 1,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 2,
+    "fields": {
+        "name": "Cast Iron Oval Casserole - 25cm; Volcanic",
+        "price": "210.00",
+        "qty": 27,
+        "brand": 1,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 4,
+    "fields": {
+        "name": "Gordon Ramsay Maze 12 Piece Set, White",
+        "price": "85.00",
+        "qty": 2,
+        "brand": 2,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 5,
+    "fields": {
+        "name": "9-speed Hand Mixer; Almond Cream",
+        "price": "99.99",
+        "qty": 9,
+        "brand": 3,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 6,
+    "fields": {
+        "name": "Mini Stand Mixer; Empire Red",
+        "price": "399.00",
+        "qty": 2,
+        "brand": 3,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 7,
+    "fields": {
+        "name": "50's Style Stand Mixer, Full-Colour White",
+        "price": "449.00",
+        "qty": 0,
+        "brand": 4,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 8,
+    "fields": {
+        "name": "50's Style Stand Mixer, Black",
+        "price": "449.99",
+        "qty": 1,
+        "brand": 4,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 9,
+    "fields": {
+        "name": "Polka Bedding Set, King, Silver",
+        "price": "105.00",
+        "qty": 5,
+        "brand": 5,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 10,
+    "fields": {
+        "name": "Paignton Bedding Set, King, White",
+        "price": "105.00",
+        "qty": 0,
+        "brand": 5,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 11,
+    "fields": {
+        "name": "Original Kettle E-5710 Charcoal Barbecue - 57cm; Black",
+        "price": "199.99",
+        "qty": 1,
+        "brand": 6,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 12,
+    "fields": {
+        "name": "Compact Charcoal Grill, 57 cm",
+        "price": "139.99",
+        "qty": 29,
+        "brand": 6,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 13,
+    "fields": {
+        "name": "Falcon T2 Square Parasol, 2.7m, Taupe",
+        "price": "344.99",
+        "qty": 5,
+        "brand": 7,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 14,
+    "fields": {
+        "name": "Riva Round Parasol - 3m; Anthracite",
+        "price": "79.99",
+        "qty": 8,
+        "brand": 7,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 15,
+    "fields": {
+        "name": "Glow Challenger T2 Square Parasol - 3m, Taupe",
+        "price": "619.99",
+        "qty": 30,
+        "brand": 7,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 16,
+    "fields": {
+        "name": "Ceramic Bottle Lamp, Small",
+        "price": "95.00",
+        "qty": 0,
+        "brand": 8,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 17,
+    "fields": {
+        "name": "Gold Sitting Mouse Lamp",
+        "price": "73.00",
+        "qty": 3,
+        "brand": 9,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 18,
+    "fields": {
+        "name": "Usha Mango Wood Lamp Base",
+        "price": "49.95",
+        "qty": 12,
+        "brand": 10,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 19,
+    "fields": {
+        "name": "Sea Green Honeycomb Glass Lamp",
+        "price": "95.00",
+        "qty": 4,
+        "brand": 9,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 20,
+    "fields": {
+        "name": "Faux Tortoiseshell Lamp",
+        "price": "175.00",
+        "qty": 0,
+        "brand": 11,
+        "currency": "GBP"
+    }
+},
+{
+    "model": "glist.product",
+    "pk": 21,
+    "fields": {
+        "name": "2 Person Blue Tweed Hamper",
+        "price": "85.50",
+        "qty": 2,
+        "brand": 12,
+        "currency": "GBP"
+    }
+}
+]
