@@ -17,7 +17,7 @@
 </style>
 {% endblock %}
 
-{% block title %}Manage Gift List{% endblock %}
+{% block title %}<small class="float-right"><a class="btn btn-secondary" href="{% url 'report' %}">Print</a></small> Manage Gift List{% endblock %}
 
 {% block content %}
     <div class="row" id="app">
@@ -57,7 +57,7 @@
                             <td class="py-2 px-0"><button title="Add product to List" :class="'add-btn btn btn-sm btn-primary d-' + (p.id == hiProduct ? 'block': 'none')"
                                         @click="addProduct(p.id)">&lt;</button></td>
                             <td>${ p.name }</td> <td>${ p.brandName }</td> <td>${ p.price }<small class="d-none d-md-inline text-muted">${ p.currency }</small></td> <td>${ p.qty }
-                        </td>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

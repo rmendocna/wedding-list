@@ -12,3 +12,17 @@ A couple creates a wedding list and adds different types of products to that whi
 
 ### Manage
 ![Product list and Gift list side by side](screenshots/manage.png)
+
+#### Manage has a report button now
+![print button](screenshots/print_btn.png)
+And the actual product list only shows on demand.
+At the begining all you see is your own Gift List.
+
+### Guest ordering page
+![Guest ordering page](screenshots/guest.png)
+
+### Print
+The report comes out in PDF Format
+![report](screenshots/report.png)
+
+#

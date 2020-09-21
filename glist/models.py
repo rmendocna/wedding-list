@@ -35,6 +35,9 @@ class Product(models.Model):
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE,
                                  verbose_name=_('Currency'), default="GBP")
 
+    def brand_name(self):
+        return self.brand.name
+
 
 class GiftList(models.Model):
     wedding_date = models.DateField(_('Wedding Date'))

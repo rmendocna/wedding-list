@@ -7,6 +7,7 @@ from . import api, views
 urlpatterns = [
     path('', TemplateView.as_view(template_name='glist/index.html'), name='index'),
     path('couple/', views.couple, name='couple'),
+    path('report/', views.report, name='report'),
     path('guest/<int:gift_list_id>/', views.guest, name='guest'),
     path('api/', include([
         path('currency/', api.currency_list, name='api-currency'),
