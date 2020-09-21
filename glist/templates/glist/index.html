@@ -4,5 +4,5 @@
 
 {% block content %}
     <a class="alert alert-info d-block" href="{% url 'couple' %}">I am the Bride</a>
-    <a class="alert alert-success d-block" href="">I am a Guest</a>
+    <a class="alert alert-success d-block" href="{% url 'guest' 1 %}">I am the Guest</a>
 {% endblock %}

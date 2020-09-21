@@ -24,10 +24,9 @@
         <div :class="'items-block col-' + (editMode ? '6' : '12')">
             <button :class="'btn float-right btn-' + (editMode ? 'success' : 'info')" @click="editMode = !editMode">
                 <span v-if="editMode">&gt; Done</span><span v-else>Edit</span></button>
-            <thead>
-
             <h3>My List</h3>
             <table class="table">
+                <thead>
                     <tr><th>Name</th><th>Brand</th><th>${ sumAcquired } / ${ sumQty }</th></tr>
                 </thead>
                 <tbody>

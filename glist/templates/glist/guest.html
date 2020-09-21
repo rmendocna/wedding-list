@@ -1,0 +1,176 @@
+{% extends 'glist/index.html' %}
+{% load static %}
+
+{% block css %}
+{{ block.super }}
+<style>
+    .col-12 {
+        transition: width 1s 1s
+    }
+    .product-list { overflow-y: scroll; max-height: 600px }
+    .product-list tr>*  { padding-left: 2px; padding-right: 2px}
+    .product-list tr>*:nth-child(n+4) { text-align: right }
+    .product-list th:nth-child(1) { min-width: 1.7rem }
+    tbody>tr { cursor: pointer }
+    .items-block tr>*:nth-child(3) { white-space: nowrap !important}
+    .remove.btn { margin: -2px -1rem}
+</style>
+{% endblock %}
+
+{% block title %}{{ wedding.wedding_name }} <br><small>{{ wedding.wedding_date }}</small> {% endblock %}
+
+{% block content %}
+<div class="row" id="app">
+    <div class="items-block col-6">
+        <h3 class="text-muted">Available Gift Items</h3>
+        <table class="table">
+            <thead>
+                <tr><th>Name</th><th>Brand</th><th>Price</th><th></th></tr>
+            </thead>
+            <tbody>
+                <tr v-for="itm in itemList" :key="itm.id"
+                    @click="hiProduct == itm.id ? hiProduct = null : hiProduct = itm.id"
+                    :class="hiProduct == itm.id ? 'bg-white': 'bg-light'">
+                    <td>${ itm.data && itm.data.name || '' }</td>
+                    <td>${ itm.data && itm.data.brandName }</td>
+                    <td>${ itm.price || itm.data && itm.data.price }<small v-if="itm.data" class="text-muted">${ itm.data.currency }</small></td>
+                    <td>
+                        <button v-if="hiProduct == itm.id" class="buy btn btn-info btn-sm"
+                                @click="buyItem(itm, $event)">Offer &gt;</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-6">
+        <h3>My Orders</h3>
+        <div class="purchase-list">
+            <table class="table">
+                <thead>
+                    <tr><th>Name</th><th>Brand</th><th>Total</th><th>Date</th></tr>
+                </thead>
+                <tbody>
+                    <tr v-for="p in purchaseList" :key="p.id">
+                        <td><span v-if="p.ref && p.ref.data">${ p.ref.data.name }</span></td>
+                        <td><span v-if="p.ref && p.ref.data">${ p.ref && p.ref.data.brandName }</td>
+                        <td>${ p.total }<small class="d-none d-md-inline text-muted" v-if="p.ref && p.ref.data">${ p.ref.data.currency }</small></td>
+                        <td><span v-if="p.date_paid">${ p.date_paid.substr(0,10) }</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block js %}
+{{ block.super }}
+<script src="//cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
+<!--script src="//cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script-->
+<script src="{% static 'glist/js/vue.js' %}"></script>
+<script src="//unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+
+    var app = new Vue({
+        delimiters: ["${", "}"],
+        el: '#app',
+        data: {
+            currencies: [{}],
+            brands: [{}],
+            products: [{}],
+            purchases: [{}],
+            items: [{}],
+            hiProduct: null  // which product is highlighted
+        },
+        methods: {
+            buyItem: function (item, event) {
+                var self = this;
+                if (confirm('Are you sure you want to offer item `' + item.data.name + '`?')) {
+                    axios.post('{% url 'api-purchase' wedding.pk %}', {item_id: item.id},
+                        { xsrfCookieName: '{{ cookie_name }}',
+                          xsrfHeaderName: '{{ cookie_header }}',
+                          headers: {'X-Requested-With': 'XMLHttpRequest'}
+                          }
+                        ).then(function(response) {
+                            var purchase = response.data,
+                                itm = _.find(self.items, {id: purchase.item});
+                            self.purchases.push(purchase);
+                            if (itm)
+                                itm.qty_purchased += 1
+
+                        })
+                }
+            },
+            loadIndex: function (url, storeAttr) {
+                var self = this;
+                axios.get(url).then(function(response) {
+                    var data = JSON.parse(response.data);
+                    self[storeAttr] = data.map(function (c) {
+                        return {code: c.pk, name: c.fields.name }
+                    })
+                })
+            },
+            loadList: function (url, storeAttr) {
+                var self = this;
+                axios.get(url).then(function(response) {
+                    var data = JSON.parse(response.data);
+                    self[storeAttr] = data.map(function (p) {
+                        var itm = p.fields;
+                        itm.id = p.pk;
+                        return itm
+                    })
+                })
+            }
+        },
+        computed: {
+            productList: function () {
+                var self = this;
+                return self.products.map(function (p) {
+                    var out = p,
+                        brand = _.find(self.brands, {code: out.brand});
+                    out.brandName = brand && brand.name || out.brand;
+                    return out
+                })
+            },
+            purchaseList: function () {
+                var self = this;
+                return self.purchases.map(function (p) {
+                    var out = p,
+                        item = _.find(self.itemList, {id: out.item});
+                    out.ref = item;
+                    return out
+                })
+            },
+            purchasesTotal: function () {
+                var self = this;
+                return _.reduce(self.purchases, function (acc, x) { return acc += x.total || 0 }, 0)
+            },
+            itemList: function () {
+                var self = this,
+                    items = _.filter(self.items, function (i) {
+                        return i.qty != i.qty_purchased
+                    });
+                return items.map(function (i) {
+                    var obj = i;
+                    obj.data = _.find(self.productList, {id: i.product});
+                    return obj;
+                })
+            }
+        },
+        created: function () {
+            var self = this;
+            self.loadIndex('{% url 'api-currency' %}', 'currencies');
+            self.loadIndex('{% url 'api-brand' %}', 'brands');
+        },
+        mounted: function () {
+            var self = this;
+            self.loadList('{% url 'api-product' %}', 'products');
+            self.loadList('{% url 'api-gift' %}', 'items');
+            self.loadList('{% url 'api-purchase' wedding.pk %}', 'purchases');
+        }
+    })
+
+</script>
+{% endblock %}

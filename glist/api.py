@@ -7,7 +7,7 @@ from django.forms.models import model_to_dict
 from django.http import (Http404, HttpResponseBadRequest,
                          HttpResponseNotAllowed, JsonResponse)
 
-from .models import Brand, Currency, Product, GiftList, GiftListItem
+from .models import (Brand, Currency, Product, GiftList, GiftListItem, Purchase)
 
 
 def allowed(*methods):
@@ -135,10 +135,47 @@ def gift_item(request, item_id):
 
 @allowed('GET')
 @authenticated
-def guest_gift_list(request, gift_list_id):
+def purchase_list(request, gift_list_id):
     guest = request.user.invitations.get(wedding_id=gift_list_id)
     gl = guest.wedding
     if not gl.active:
         return Http404()
-    items = serialize('json', gl.items.filter(qty__gt=F('qty_purchased')))
+    items = serialize('json', Purchase.objects.filter(customer=guest))
     return JsonResponse(items, safe=False)
+
+
+@allowed('POST')
+@authenticated
+def purchase_add(request, gift_list_id):
+    """
+    Buy 1 count of Gift from the GiftList <gift_list_id>
+    """
+    guest = request.user.invitations.get(wedding_id=gift_list_id)
+    gl = guest.wedding
+    if not gl.active:
+        return Http404()
+    data = json.loads(request.body)
+    if type(data.get('item_id', 'error')) != int:
+        return HttpResponseBadRequest
+    item_id = data['item_id']
+    try:
+        item = GiftListItem.objects.get(pk=item_id, qty__gt=F('qty_purchased'))
+    except GiftListItem.DoesNotExist:
+        return JsonResponse({'errors': ['Item could not be purchased']}, status_code=404)
+    else:
+        purchase = Purchase(customer=guest, item=item, qty=1, total=item.get_price())
+        purchase.save()
+        # Increase the amount of acquired related gift item
+        item.qty_purchased += 1
+        item.save()
+        output = model_to_dict(purchase)
+        return JsonResponse(output)
+
+
+def purchase(request, *args, **kwargs):
+    if request.method == 'POST':
+        return purchase_add(request, *args, **kwargs)
+    elif request.method == 'GET':
+        return purchase_list(request, *args, **kwargs)
+    else:
+        return HttpResponseNotAllowed()
