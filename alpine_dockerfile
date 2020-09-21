@@ -1,0 +1,35 @@
+FROM python:3.8-alpine
+ENV PYTHONUNBUFFERED 1
+
+# Creating working directory
+RUN mkdir /code
+WORKDIR /code
+
+# Copying requirements
+COPY . .
+
+RUN apk add --no-cache --virtual .build-deps \
+    ca-certificates gcc linux-headers musl-dev \
+    libffi-dev jpeg-dev zlib-dev \
+    && pip install -r requirements.txt \
+    && find /usr/local \
+        \( -type d -a -name test -o -name tests \) \
+        -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
+        -exec rm -rf '{}' + \
+    && runDeps="$( \
+        scanelf --needed --nobanner --recursive /usr/local \
+                | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
+                | sort -u \
+                | xargs -r apk info --installed \
+                | sort -u \
+    )" \
+    && apk add --virtual .rundeps $runDeps \
+    && apk del .build-deps
+
+RUN python manage.py migrate
+RUN DJANGO_SUPERUSER_PASSWORD=test python manage.py createsuperuser --username test --email test@test.tst --noinput
+RUN python manage.py load_products glist/fixtures/products.json
+RUN python manage.py loaddata users
+RUN python manage.py loaddata giftlist
+RUN python manage.py loaddata guests
+

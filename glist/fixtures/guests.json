@@ -4,7 +4,7 @@
     "pk": 1,
     "fields": {
         "email": "guest1@example.com",
-        "recipient": "Ricardo Mendonça",
+        "recipient": "M Guest",
         "wedding": 1,
         "user": 2
     }
